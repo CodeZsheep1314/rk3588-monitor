@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+# watchload - RK3588 实时负载监控启动脚本
+# 用法:
+#   ./watchload           # 启动终端模式 (默认)
+#   ./watchload -t        # 显式指定终端模式
+#   ./watchload -h        # 显示帮助
+#
+# 仅支持终端模式 (-t), 旧版 -g (matplotlib 画图) 已废弃.
+
+SCRIPT_PATH=$(cd "$(dirname "$0")" && pwd)
+
+show_help() {
+  cat <<EOF
+watchload - RK3588 实时负载监控
+
+用法:
+  watchload              启动终端模式
+  watchload -t           启动终端模式 (显式指定)
+  watchload -h, --help   显示本帮助
+
+依赖:
+  - python3 >= 3.10
+  - uv (https://github.com/astral-sh/uv), 用于自动管理依赖
+  - sudo 权限, 用于读取 NPU 驱动负载
+EOF
+}
+
+case "${1:-}" in
+  ""|"-t")
+    exec uv run "$SCRIPT_PATH/watchload.py" -m t
+    ;;
+  "-h"|"--help")
+    show_help
+    ;;
+  "-g")
+    echo "[Error] '-g' 画图模式已废弃, 仅保留终端模式 (-t)." >&2
+    exit 1
+    ;;
+  *)
+    echo "unknown arg: $1, you can use -t or -h" >&2
+    exit 1
+    ;;
+esac
